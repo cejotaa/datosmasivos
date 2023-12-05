@@ -3,8 +3,8 @@ import pandas as pd
 import json
 import os
 
-from aemet.aemet_crawler import AEMETCrawler
-from aemet.aemet_parser import AEMETParser
+from scripts.aemet.aemet_crawler import AEMETCrawler
+from scripts.aemet.aemet_parser import AEMETParser
 
 
 class AEMETApi:
