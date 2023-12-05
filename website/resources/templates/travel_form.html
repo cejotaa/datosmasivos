@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Formulario a la izquierda -->
+            <div class="container">
+                <!--img src="{{ url_for('static', filename='website/resources/static/img.png') }}" alt="Logo of the app"-->
+                <h2 class="mb-5">Search your best route!</h2> <!-- mb-X aumenta el margen-->
+                <form method="POST" action="{{ url_for('home') }}">
+                    {{ form.csrf_token }}
+
+                    <div class="mb-3 d-flex align-items-center">
+                        {{ form.destination.label(class="me-2", style="width: 100px") }}
+                        {{ form.destination(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
+                    </div>
+
+                    <div class="mb-3 d-flex align-items-center">
+                        {{ form.people.label(class="me-2", style="width: 100px") }}
+                        {{ form.people(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
+                    </div>
+
+                    <div class="mb-3 d-flex align-items-center">
+                        {{ form.days.label(class="me-2", style="width: 100px") }}
+                        {{ form.days(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
+                    </div>
+
+                    <div class="mb-3 d-flex align-items-center">
+                        {{ form.way_transport.label(class="me-2", style="width: 100px") }}
+                        {{ form.way_transport(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
+                    </div>
+
+                    <div class="mb-3 d-flex align-items-center">
+                        {{ form.type_trip.label(class="me-2", style="width: 100px") }}
+                        {{ form.type_trip(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
+                    </div>
+
+                    {{ form.submit(class="btn btn-primary") }}
+                </form>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <!-- Poner mapa a la derecha -->
+        </div>
+    </div>
+</div>
+{% endblock %}
