@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block titulo %} Listado de viajes disponibles {% endblock %}
+{% block contenido_principal %}
+
+<h2>Viajes disponibles</h2>
+<div class="row">
+    <!-- http://librosweb.es/libro/bootstrap_3/capitulo_2/tipos_de_rejillas.html -->
+    <!-- Inicio del Bloque -->
+
+    {% if travels.length  %}
+    <table class="table table-hover" id="tableTravels">
+        <thead>
+        <tr>
+            <th>Alojamiento</th>
+            <th>Transporte</th>
+            <th>Actividad</th>
+            <th>Ruta</th>
+            <th class="col-md-1"></th>
+            <th class="col-md-1"></th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for travel in travels %}
+        <tr>
+
+            <td>{{travel.activity}}</td>
+            <td>{{travel.transport}}</td>
+            <td>{{travel.route}}</td>
+
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No tienes ningun viaje planificado</p>
+    {% endif %}
+
+</div>
