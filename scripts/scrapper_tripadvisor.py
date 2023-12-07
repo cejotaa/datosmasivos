@@ -62,47 +62,6 @@ def obtener_codigo(capitales, argumento):
       return codigo
   return None
 
-argumento = input("Introduce el nombre de la ciudad: ")
-codigo_ciudad = obtener_codigo(capitales,argumento)
-
-# URL de la página de resultados de TripAdvisor
-url = f"https://www.tripadvisor.com/Attractions-{codigo_ciudad}-Activities-oa0"
-
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-}
-
- # Realizar una solicitud HTTP para obtener la página
-response = requests.get(url,headers=headers, timeout=10)
-    
-# Parsear el contenido de la página con BeautifulSoup
-soup = BeautifulSoup(response.content, "html.parser")
-
-activities_containers = soup.find_all("div", class_="hZuqH y")
-i = 0
-actividades = []
-for container in activities_containers:
-     # Obtener el nombre de actividad
-    name = container.find("div", class_="XfVdV o AIbhI").text.strip()
-   
-    # Obtener el tipo de actividad
-    tipo = container.find("div", class_="biGQs _P pZUbB hmDzD").text.strip()   
-
-    #obtener valoracion
-    valoracion = container.find('svg')['aria-label']     
-
-    actividad = {
-        "Nombre": name,
-        "Tipo": tipo,
-        "Valoracion": valoracion
-    }
-    
-    actividades.append(actividad)
-    i += 1 
-
-    if i >=30:
-        break
-
 def procesar_actividades(actividades):
     for actividad in actividades:
         # Procesar el campo 'Nombre'
@@ -131,17 +90,62 @@ def procesar_actividades(actividades):
             # Actualizar el campo 'Valoracion' con el nuevo formato
             actividad["Valoracion"] = nueva_valoracion
 
+def tripadvisor(argumento):
+    # argumento = input("Introduce el nombre de la ciudad: ")
+    # codigo_ciudad = obtener_codigo(capitales,argumento)
 
-# Llama a la función para procesar la lista de actividades
-procesar_actividades(actividades)
+    # URL de la página de resultados de TripAdvisor
+    url = f"https://www.tripadvisor.com/Attractions-{argumento}-Activities-oa0"
 
-# Imprime el resultado esperado
-for actividad in actividades:
-    print("Nombre:", actividad["Nombre"])
-    print("Tipo:", actividad["Tipo"])
-    print("Valoracion:", actividad["Valoracion"])
-    print()
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML/like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+
+    # Realizar una solicitud HTTP para obtener la página
+    response = requests.get(url,headers=headers, timeout=10)
+        
+    # Parsear el contenido de la página con BeautifulSoup
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    activities_containers = soup.find_all("div", class_="hZuqH y")
+    i = 0
+    actividades = []
+    for container in activities_containers:
+        # Obtener el nombre de actividad
+        name = container.find("div", class_="XfVdV o AIbhI").text.strip()
+    
+        # Obtener el tipo de actividad
+        tipo = container.find("div", class_="biGQs _P pZUbB hmDzD").text.strip()   
+
+        #obtener valoracion
+        valoracion = container.find('svg')['aria-label']     
+
+        actividad = {
+            "Id": i,
+            "Nombre": name,
+            "Tipo": tipo,
+            "Valoracion": valoracion
+        }
+        
+        actividades.append(actividad)
+        i += 1 
+
+        if i >=30:
+            break
 
 
-df = pd.DataFrame(actividades)
-df.to_json("actividades.json", orient="records")
+    # Llama a la función para procesar la lista de actividades
+    procesar_actividades(actividades)
+    return actividades
+
+
+    # # Imprime el resultado esperado
+    # for actividad in actividades:
+    #     print("Nombre:", actividad["Nombre"])
+    #     print("Tipo:", actividad["Tipo"])
+    #     print("Valoracion:", actividad["Valoracion"])
+    #     print()
+
+
+    # df = pd.DataFrame(actividades)
+    # df.to_json("actividades.json", orient="records")
