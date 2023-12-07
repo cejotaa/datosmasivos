@@ -3,6 +3,7 @@ import googlemaps
 
 claveAPI = "AIzaSyAV50jKxT5jnmiIYR-EOCwtUZwkzsIxHwA"
 
+
 # Rutas de montaña: park, natural_feature
 # Comida: restaurant
 # tourist_attraction
@@ -26,14 +27,15 @@ def incluye(lista1: list, elemento: dict):
         tipo = "camping"
     elif 'rv_park' in elemento['types']:
         tipo="camping de caravanas"
-
+    
     diccio = {
         "nombre": elemento["name"],
         "coordenadas": elemento["geometry"]["location"],
-        "valoracion": elemento["rating"],
+        "valoracion": elemento["rating"] if elemento.get("rating") else "Sin valoración",
         "direccion": elemento["vicinity"],
         "tipo": tipo
     }
+    
     lista1.append(diccio)
 
 class GMaps():
@@ -58,6 +60,7 @@ class GMaps():
         return (response['status'],response['results'],mas)
     
     def busqueda_alojamiento(self, ciudad, orden_distancia=False):
+        
         self.token = None
         self.loc = geolocalizacion(ciudad)
 

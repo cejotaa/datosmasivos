@@ -8,12 +8,12 @@ from scripts.aemet.aemet_parser import AEMETParser
 
 
 class AEMETApi:
-    def __init__(self, api_key):
+    def __init__(self, api_key,codmun):
         self.api_key = api_key
         self.root_url = "https://opendata.aemet.es/opendata/api"
 
         crawler = AEMETCrawler()
-        response = crawler.get_meteorological_data(self.root_url, self.api_key)
+        response = crawler.get_meteorological_data(self.root_url, self.api_key,codmun)
 
         parser = AEMETParser()
         parsed_data = parser.mun_parse(response)
