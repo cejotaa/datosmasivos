@@ -130,9 +130,10 @@ def form_route():
         session['startdate'] = travel_form.startdate.data
         session['tipo_viaje'] = tipo_viaje
 
-        alojamiento = consultas(destination, tipo_viaje)
+        alojamiento, rutas = consultas(destination, tipo_viaje)
         # Call the apis etc, get the data and process it, save it into a list
         session['alojamientos'] = alojamiento
+        session['rutas']=rutas
         return redirect(url_for('travel_list'))
     return render_template("travel_form.html", form=travel_form)
 
@@ -140,24 +141,57 @@ def form_route():
 def consultas(destino, tipo_viaje):
     aux = []
     routes = []
+    rutas_completas = []
+    rutas = []
+    # choices=[("cultural", "Cultural"), ("sporty", "Deporte"), ("mix", "Mixto")],
 
     alojamiento = busqueda(lista_ciudades[int(destino)]["Ciudad"])[0:2]  # solo queremos 2 alojamientos
     lista_tiempo = aemetapi(lista_ciudades[int(destino)]["CPRO"] + lista_ciudades[int(destino)]["CMUN"])
 
-    # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))
-    actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])
+    if tipo_viaje == "cultural":
+        actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])[0:5]
 
-    # Creating List of Route elements that have the complete set of data.
+        rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
+    elif tipo_viaje == "sporty":
+        #routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:5]
+        print("routes things and stuff")
+    else:
+        actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])[0:5]
+        rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
+        #routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))
+
+
+    # TODO: Creating List of Route elements that have the complete set of data of
+    #  Nombre: -> route.titulo | actividad.nombre
+    #  Tipo: -> cultural (actividades) vs deportivo (routes
+    #  Ubicación: -> destination
+    #  Temperaturas: -> lista_tiempo[0].tmax lista_tiempo[0].tmin
+    #  Ver más: el resto de datos.
 
     app.logger.info(lista_tiempo)
-    return alojamiento, actividades
+    return alojamiento, rutas_completas
 
+def aux_parse_activities(actividades, destino, lista_tiempo):
+    rutas_completas = []
+    temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
+
+    for actividad in actividades:
+
+        elemento = {
+            "nombre": actividad['Nombre'],
+            "tipo": "Cultural",
+            "ubicacion": destino,
+            "temperatura": temperatura,
+            "otros": "Detalles de la actividad"
+        }
+        rutas_completas.append(elemento)
+    return rutas_completas
 
 @app.route("/travel_list", methods=["GET", "POST"])
 def travel_list():
     alojamientos = session.get('alojamientos')
-
-    return render_template('travel_list.html', alojamientos=alojamientos)
+    rutas = session.get('rutas')
+    return render_template('travel_list.html', alojamientos=alojamientos, rutas=rutas)
 
 
 # decorator for route(argument) function

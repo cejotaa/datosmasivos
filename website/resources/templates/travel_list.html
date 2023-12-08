@@ -14,11 +14,20 @@
             <th>Tipo</th>
             <th>Ubicación</th>
             <th>Temperaturas</th>
-            <th>Ver más</th>
-            <th class="col-md-1"></th>
             <th class="col-md-1"></th>
         </tr>
         </thead>
+        <tbody>
+            {% for ruta in rutas %}
+            <tr>
+                <td>{{ ruta.nombre }}</td>
+                <td>{{ ruta.tipo }}</td>
+                <td>{{ ruta.ubicacion }}</td>
+                <td>{{ ruta.temperatura }}</td>
+                <td class="col-md-1"><a href="#">Ver más</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </div>
 <div>
