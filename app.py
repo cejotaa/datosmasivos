@@ -160,19 +160,19 @@ def consultas(destino, tipo_viaje):
         rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
         #routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))
 
+    app.logger.info(lista_tiempo)
+    return alojamiento, rutas_completas
 
-    # TODO: Creating List of Route elements that have the complete set of data of
+# Doing: Creating List of Route elements that have the complete set of data of
     #  Nombre: -> route.titulo | actividad.nombre
     #  Tipo: -> cultural (actividades) vs deportivo (routes
     #  Ubicación: -> destination
     #  Temperaturas: -> lista_tiempo[0].tmax lista_tiempo[0].tmin
     #  Ver más: el resto de datos.
 
-    app.logger.info(lista_tiempo)
-    return alojamiento, rutas_completas
-
 def aux_parse_activities(actividades, destino, lista_tiempo):
     rutas_completas = []
+    destino = lista_ciudades[int(destino)]['Ciudad']
     temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
 
     for actividad in actividades:
