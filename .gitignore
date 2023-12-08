@@ -1,2 +1,8 @@
 
 .idea/
+
+datos/aemet/imagenes/
+
+scripts/__pycache__/
+
+scripts/aemet/__pycache__/

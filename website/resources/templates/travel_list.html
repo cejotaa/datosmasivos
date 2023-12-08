@@ -19,9 +19,32 @@
             <th class="col-md-1"></th>
         </tr>
         </thead>
-
+    </table>
+</div>
+<div>
+    <h2>Alojamientos disponibles</h2>
+    <table class="table table-hover" id="tableAlojamientos">
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Dirección</th>
+            <th>Valoración</th>
+            <th class="col-md-1"></th>
+            <th class="col-md-1"></th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for alojamiento in alojamientos %}
+            <tr>
+                <td>{{ alojamiento.nombre }}</td>
+                <td>{{ alojamiento.direccion }}</td>
+                <td>{{ alojamiento.valoracion }}</td>
+                <td class="col-md-1"><a href="#">Detalles</a></td>
+                <td class="col-md-1"><a href="#">Reservar</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
 
     </table>
-
 </div>
 {% endblock %}

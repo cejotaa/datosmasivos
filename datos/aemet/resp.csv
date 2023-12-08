@@ -1,0 +1,8 @@
+,Fecha,Periodo,Temperatura máx,Temperatura mínima,Precipitación,Viento,UvMax,estadoCielo,imagenCielo
+0,2023-12-08T00:00:00,0,16,11,0,0,1.0,,
+1,2023-12-09T00:00:00,0,18,15,100,20,1.0,Cubierto con lluvia,26
+2,2023-12-10T00:00:00,0,19,17,100,25,1.0,Cubierto con lluvia,26
+3,2023-12-11T00:00:00,0,19,16,100,25,1.0,Cubierto con lluvia,26
+4,2023-12-12T00:00:00,0,18,12,100,25,1.0,Nuboso con lluvia,24
+5,2023-12-13T00:00:00,0,15,10,100,15,,Nuboso con lluvia,24
+6,2023-12-14T00:00:00,0,14,11,75,20,,Intervalos nubosos con lluvia escasa,43
