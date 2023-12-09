@@ -98,7 +98,7 @@ def busqueda(ciudad):
     res = []
     # res.extend(respuesta[1])
     for elem in respuesta[1]:
-        incluye(res,elem)
+        incluye(res, elem)
     estado = respuesta[0]
     mas = respuesta[2]
 

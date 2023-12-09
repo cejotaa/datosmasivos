@@ -115,8 +115,7 @@ def tripadvisor(argumento):
         tipo = container.find("div", class_="biGQs _P pZUbB hmDzD").text.strip()   
 
         #obtener valoracion
-        valoracion = container.find('svg')['aria-label']     
-
+        valoracion = container.find('svg')['aria-label']
         actividad = {
             "Id": i,
             "Nombre": name,

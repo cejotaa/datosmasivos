@@ -3,9 +3,9 @@
 <div class="container-fluid">
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-8" id="background_div">
             <!-- Formulario a la izquierda -->
-            <div class="container">
+            <div class="container card p-4 rounded">
                 <!--img src="{{ url_for('static', filename='website/resources/static/img.png') }}" alt="Logo of the app"-->
                 <h2 class="mb-5">Search your best route!</h2> <!-- mb-X aumenta el margen-->
 
@@ -47,10 +47,10 @@
 
 </div>
 
-<!-- Agregar el script de Google Maps API con tu clave API -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAV50jKxT5jnmiIYR-EOCwtUZwkzsIxHwA&libraries=places&callback=initMap" async defer></script>
+<!-- Google -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArNaWIlxGdk1DYTTcXJny2YaeZTMsvUTI&libraries=places&callback=initMap" async defer></script>
 
-<!-- Agregar el script para manejar el mapa -->
+<!-- Mapa -->
 <script>
     var map;
 
@@ -60,11 +60,11 @@
             zoom: 8
         });
 
-        // Función para actualizar el mapa según la dirección de destino
+        // Actualiza mapa
         function updateMap(destination) {
-            var geocoder = new google.maps.Geocoder();
 
-            // Convierte la dirección en coordenadas
+            var geocoder = new google.maps.Geocoder();
+            // Problema para obtener la address -> la destination no se corresponde con lo que necesita geocode, destination es numérica
             geocoder.geocode({'address': destination}, function(results, status) {
                 if (status === 'OK') {
                     map.setCenter(results[0].geometry.location);
@@ -73,17 +73,15 @@
                         position: results[0].geometry.location
                     });
                 } else {
-                    alert('Geocode was not successful for the following reason: ' + status);
+                    alert('Geocode was not successful for the following reason: ' + status + destination);
                 }
             });
         }
 
-        // Llama a updateMap cuando se cambia el valor del campo destination
-        document.addEventListener('DOMContentLoaded', function() {
-            var destinationInput = document.querySelector('#id_destination'); // Ajusta el selector según tu formulario
-            destinationInput.addEventListener('change', function() {
-                updateMap(destinationInput.value);
-            });
+        // Llama a updateMap cuando cambia la destination
+        var destinationInput = document.querySelector('#id_destination');
+        destinationInput.addEventListener('input', function() {
+            updateMap(destinationInput.value);
         });
     }
 </script>

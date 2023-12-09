@@ -133,7 +133,7 @@ def form_route():
         alojamiento, rutas = consultas(destination, tipo_viaje)
         # Call the apis etc, get the data and process it, save it into a list
         session['alojamientos'] = alojamiento
-        session['rutas']=rutas
+        session['rutas'] = rutas
         return redirect(url_for('travel_list'))
     return render_template("travel_form.html", form=travel_form)
 
@@ -153,39 +153,53 @@ def consultas(destino, tipo_viaje):
 
         rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
     elif tipo_viaje == "sporty":
-        #routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:5]
+        # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:5]
         print("routes things and stuff")
     else:
         actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])[0:5]
         rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
-        #routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))
+        # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))
 
     app.logger.info(lista_tiempo)
     return alojamiento, rutas_completas
 
+
 # Doing: Creating List of Route elements that have the complete set of data of
-    #  Nombre: -> route.titulo | actividad.nombre
-    #  Tipo: -> cultural (actividades) vs deportivo (routes
-    #  Ubicación: -> destination
-    #  Temperaturas: -> lista_tiempo[0].tmax lista_tiempo[0].tmin
-    #  Ver más: el resto de datos.
+#  Nombre: -> route.titulo | actividad.nombre
+#  Tipo: -> cultural (actividades) vs deportivo (routes
+#  Ubicación: -> destination
+#  Temperaturas: -> lista_tiempo[0].tmax lista_tiempo[0].tmin
+#  Ver más: el resto de datos.
 
 def aux_parse_activities(actividades, destino, lista_tiempo):
     rutas_completas = []
     destino = lista_ciudades[int(destino)]['Ciudad']
     temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
+    # Crear resumen de temperaturas
+    resumen = " "
+
+    resumen += "Temperaturas: "
+    for i, temp_data in enumerate(lista_tiempo, start=1):
+        resumen += f"Día {i}: Fecha {temp_data['Fecha']}, Temperatura máxima {temp_data['TMax']}, Temperatura mínima {temp_data['TMin']}"
+    resumen += " "
 
     for actividad in actividades:
-
+        resumen += f"Tipo de actividad {actividad['Tipo'][0]}"
+        resumen += f"Valoracion {actividad['Valoracion']}"
         elemento = {
+            "id": actividad['Id'],
             "nombre": actividad['Nombre'],
             "tipo": "Cultural",
             "ubicacion": destino,
             "temperatura": temperatura,
-            "otros": "Detalles de la actividad"
+            "valoracion": f"'{actividad['Valoracion']}'",
+            "tipoActividad": f"{actividad['Tipo'][0]}",
+            "otros": resumen
         }
         rutas_completas.append(elemento)
     return rutas_completas
+
+
 
 @app.route("/travel_list", methods=["GET", "POST"])
 def travel_list():
