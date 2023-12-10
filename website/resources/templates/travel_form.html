@@ -1,19 +1,23 @@
-{% extends 'base.html' %}
-
+{% extends 'base.html'%}
 {% block content %}
 <div class="container-fluid">
+
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-8" id="background_div">
             <!-- Formulario a la izquierda -->
-            <div class="container">
+            <div class="container card p-4 rounded">
                 <!--img src="{{ url_for('static', filename='website/resources/static/img.png') }}" alt="Logo of the app"-->
                 <h2 class="mb-5">Search your best route!</h2> <!-- mb-X aumenta el margen-->
-                <form method="POST" action="{{ url_for('consult') }}">
-                    {{ form.csrf_token }}
 
+                <form action="" method='POST' name="myform">
+                    {{ form.csrf_token }}
+                    <div class="mb-3 d-flex align-items-center">
+                        {{ form.startdate.label(style="width: 100px")}}
+                        {{ form.startdate(class='datepicker', style="width:200px")}} {{ form.hidden_tag() }}
+                    </div>
                     <div class="mb-3 d-flex align-items-center">
                         {{ form.destination.label(class="me-2", style="width: 100px") }}
-                        {{ form.destination(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
+                        {{ form.destination(class="form-select form-control form-control-sm me-2", style="width: 200px", id="id_destination") }}
                     </div>
 
                     <div class="mb-3 d-flex align-items-center">
@@ -27,11 +31,6 @@
                     </div>
 
                     <div class="mb-3 d-flex align-items-center">
-                        {{ form.way_transport.label(class="me-2", style="width: 100px") }}
-                        {{ form.way_transport(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
-                    </div>
-
-                    <div class="mb-3 d-flex align-items-center">
                         {{ form.type_trip.label(class="me-2", style="width: 100px") }}
                         {{ form.type_trip(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
                     </div>
@@ -42,7 +41,49 @@
         </div>
         <div class="col-md-4">
             <!-- Poner mapa a la derecha -->
+            <div id="map" style="height: 400px;"></div>
         </div>
     </div>
+
 </div>
+
+<!-- Google -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArNaWIlxGdk1DYTTcXJny2YaeZTMsvUTI&libraries=places&callback=initMap" async defer></script>
+
+<!-- Mapa -->
+<script>
+    var map;
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: -34.397, lng: 150.644},
+            zoom: 8
+        });
+
+        // Actualiza mapa
+        function updateMap(destination) {
+
+            var geocoder = new google.maps.Geocoder();
+            // Problema para obtener la address -> la destination no se corresponde con lo que necesita geocode, destination es numérica
+            geocoder.geocode({'address': destination}, function(results, status) {
+                if (status === 'OK') {
+                    map.setCenter(results[0].geometry.location);
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location
+                    });
+                } else {
+                    alert('Geocode was not successful for the following reason: ' + status + destination);
+                }
+            });
+        }
+
+        // Llama a updateMap cuando cambia la destination
+        var destinationInput = document.querySelector('#id_destination');
+        destinationInput.addEventListener('input', function() {
+            updateMap(destinationInput.value);
+        });
+    }
+</script>
+
 {% endblock %}

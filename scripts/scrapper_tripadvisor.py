@@ -1,9 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-import sys
 import re
-from flask import Flask, render_template
-import pandas as pd
 
 capitales = [
     ("A Coruña", "g187507"),
@@ -118,8 +115,7 @@ def tripadvisor(argumento):
         tipo = container.find("div", class_="biGQs _P pZUbB hmDzD").text.strip()   
 
         #obtener valoracion
-        valoracion = container.find('svg')['aria-label']     
-
+        valoracion = container.find('svg')['aria-label']
         actividad = {
             "Id": i,
             "Nombre": name,
