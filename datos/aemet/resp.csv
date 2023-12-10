@@ -1,8 +1,8 @@
 ,Fecha,Periodo,Temperatura máx,Temperatura mínima,Precipitación,Viento,UvMax,estadoCielo,imagenCielo
-0,2023-12-09T00:00:00,0,15,3,0,0,2.0,,
-1,2023-12-10T00:00:00,0,15,4,0,0,2.0,Nubes altas,17
-2,2023-12-11T00:00:00,0,16,3,0,5,2.0,Muy nuboso,15
-3,2023-12-12T00:00:00,0,14,5,50,10,2.0,Nuboso con lluvia escasa,44
-4,2023-12-13T00:00:00,0,10,2,95,20,2.0,Nuboso con lluvia,24
-5,2023-12-14T00:00:00,0,8,2,50,25,,Nuboso con lluvia escasa,44
-6,2023-12-15T00:00:00,0,8,-1,10,15,,Nuboso,14
+0,2023-12-10T00:00:00,0,19,13,0,0,1.0,,
+1,2023-12-11T00:00:00,0,19,12,15,0,1.0,Intervalos nubosos,13
+2,2023-12-12T00:00:00,0,16,11,100,10,1.0,Cubierto con lluvia,26
+3,2023-12-13T00:00:00,0,11,8,100,25,1.0,Muy nuboso con lluvia,25
+4,2023-12-14T00:00:00,0,11,7,100,10,1.0,Nuboso con lluvia,24
+5,2023-12-15T00:00:00,0,13,4,35,0,,Nuboso,14
+6,2023-12-16T00:00:00,0,12,3,0,0,,Despejado,11

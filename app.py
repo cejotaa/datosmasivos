@@ -10,6 +10,9 @@ from scripts.scrapper_tripadvisor import *
 from scripts.aemet.aemet import *
 import csv
 
+'''
+    Configuring the app
+'''
 app = Flask(__name__, template_folder='website/resources/templates/', static_folder='website/resources/static/')
 app.secret_key = "secret_key_123"
 api_key_aemet = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA1MDc5NzBAYWx1bW5vcy51YzNtLmVzIiwianRpIjoiNjc4MWViYmItZjY0OC00MGIzLWJjMDctN2FiOTcyYWRiNGFhIiwiaXNzIjoiQUVNRVQiLCJpYXQiOjE2OTk2MzUyNjUsInVzZXJJZCI6IjY3ODFlYmJiLWY2NDgtNDBiMy1iYzA3LTdhYjk3MmFkYjRhYSIsInJvbGUiOiIifQ.yp7Maa4-Rshvm9CKIKjxDSLEZcpSCT6JrazmCPqrmX0"
@@ -18,7 +21,9 @@ api_key_aemet = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA1MDc5NzBAYWx1bW5vcy51YzNtLm
 app.config["MONGO_URI"] = "mongodb://localhost:27017/routeMaster"
 mongo = PyMongo(app)
 
-num_people = []
+'''
+    Auxiliar arrays etc
+'''
 destination = {'': 'Seleccione su destino',
                0: 'A Coruna',  # 15 030
                1: 'Albacete',  # 02 003
@@ -73,7 +78,6 @@ destination = {'': 'Seleccione su destino',
                }
 
 lista_ciudades = []
-
 csv_path = 'ciudades.csv'
 with open(csv_path, 'r', encoding="utf-8") as cities:
     csv_row = csv.reader(cities)
@@ -91,14 +95,13 @@ with open(csv_path, 'r', encoding="utf-8") as cities:
     del lista_ciudades[0]
 
 '''
-Auxiliar classes and functions for the forms
+    Auxiliar classes and functions for the travel form
 '''
 
 
 class TravelForm(FlaskForm):
     # populating the destination dropdown
     choices_dest = [(str(i), str(destination[i])) for i in destination]
-
     startdate = DateField('Start Date', format='%Y-%m-%d', validators=(validators.DataRequired(),))
     destination = SelectField(label='Destino:', choices=choices_dest, validators=[DataRequired()])
     people = SelectField(label='Número de personas:', choices=[(str(i), str(i)) for i in range(1, 20)],
@@ -112,7 +115,7 @@ class TravelForm(FlaskForm):
 
 
 '''
-Routing of the web
+    Routing of the web
 '''
 
 
@@ -123,6 +126,7 @@ def form_route():
 
     # Get the results from the travel_form and process them -> redirect to /travel_list with the resulting data
     if travel_form.validate_on_submit():
+        # TODO check the days and pass this value to the consultas(destination, tipo_viaje) to limit activities per days
         people = travel_form.people.data
         days = travel_form.days.data
         tipo_viaje = travel_form.type_trip.data
@@ -138,24 +142,37 @@ def form_route():
     return render_template("travel_form.html", form=travel_form)
 
 
+
+
+'''
+    Communication with the apis
+'''
+
+
 def consultas(destino, tipo_viaje):
-    aux = []
-    routes = []
+    '''
+        Auxiliar method that communicates with the apis, etc to extract data
+    :param destino: string that shows the index in the list of cities
+    :param tipo_viaje: string that can be "cultural", "sporty" or "mix"
+    :return: the list of hotels, the complete set of routes
+    '''
     rutas_completas = []
-    rutas = []
     # choices=[("cultural", "Cultural"), ("sporty", "Deporte"), ("mix", "Mixto")],
 
-    alojamiento = busqueda(lista_ciudades[int(destino)]["Ciudad"])[0:2]  # solo queremos 2 alojamientos
-    lista_tiempo = aemetapi(lista_ciudades[int(destino)]["CPRO"] + lista_ciudades[int(destino)]["CMUN"])
+    alojamiento = busqueda(lista_ciudades[int(destino)-1]["Ciudad"])[0:2]  # solo queremos 2 alojamientos
+    lista_tiempo = aemetapi(lista_ciudades[int(destino)-1]["CPRO"] + lista_ciudades[int(destino)-1]["CMUN"])
 
     if tipo_viaje == "cultural":
-        actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])[0:5]
-
+        # Change here 5 -> number of days
+        actividades = tripadvisor(lista_ciudades[int(destino)-1]["TripAdvisor"])[0:5]
         rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
     elif tipo_viaje == "sporty":
         # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:5]
+        # Change here 5 -> number of days
+        # TODO add routes_parser and check
         print("routes things and stuff")
     else:
+        # Change here 5 -> number of days
         actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])[0:5]
         rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
         # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))
@@ -164,23 +181,38 @@ def consultas(destino, tipo_viaje):
     return alojamiento, rutas_completas
 
 
-# Doing: Creating List of Route elements that have the complete set of data of
-#  Nombre: -> route.titulo | actividad.nombre
-#  Tipo: -> cultural (actividades) vs deportivo (routes
-#  Ubicación: -> destination
-#  Temperaturas: -> lista_tiempo[0].tmax lista_tiempo[0].tmin
-#  Ver más: el resto de datos.
+'''
+    Doing: Creating List of Route elements that have the complete set of interestint data
+    ROUTE FORMAT
+    
+    Nombre: -> route.titulo | actividad.nombre
+    Tipo: -> cultural (actividades) vs deportivo (routes
+    Ubicación: -> destination
+    Temperaturas: -> lista_tiempo[0].tmax lista_tiempo[0].tmin
+    Ver más: -> resumen del resto de campos interesantes
+'''
 
+
+# TODO problema localizado al crear el resumen y pasárselo al html, no se muestra de manera correcta
 def aux_parse_activities(actividades, destino, lista_tiempo):
+    '''
+        Aux method to parse the data in a common format of route to show in the html
+    :param actividades: list of activities to do
+    :param destino: string del index de la lista de ciudades del destino
+    :param lista_tiempo: list of seven days of temperature
+    :return: list of parsed activities into the routes format
+    '''
     rutas_completas = []
-    destino = lista_ciudades[int(destino)]['Ciudad']
+    destino = lista_ciudades[int(destino)-1]['Ciudad']
     temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
     # Crear resumen de temperaturas
-    resumen = " "
+    resumen = "Temperaturas: "
 
-    resumen += "Temperaturas: "
     for i, temp_data in enumerate(lista_tiempo, start=1):
-        resumen += f"Día {i}: Fecha {temp_data['Fecha']}, Temperatura máxima {temp_data['TMax']}, Temperatura mínima {temp_data['TMin']}"
+        resumen += f"Día {i}: Fecha {escapeHTML(temp_data['Fecha'])}, " \
+                   f"Temperatura máxima {escapeHTML(temp_data['TMax'])}, " \
+                   f"Temperatura mínima {escapeHTML(temp_data['TMin'])}"
+
     resumen += " "
 
     for actividad in actividades:
@@ -200,35 +232,58 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
     return rutas_completas
 
 
+'''
+def aux_parse_routes(routes, destino, lista_tiempo):
+
+    rutas_completas = []
+    destino = lista_ciudades[int(destino)]['Ciudad']
+    temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
+    # Crear resumen de temperaturas
+    resumen = "Temperaturas: "
+
+    for i, temp_data in enumerate(lista_tiempo, start=1):
+        resumen += f"Día {i}: Fecha {escapeHTML(temp_data['Fecha'])}, " \
+                   f"Temperatura máxima {escapeHTML(temp_data['TMax'])}, " \
+                   f"Temperatura mínima {escapeHTML(temp_data['TMin'])}"
+
+    resumen += " "
+
+    for route in routes:
+        resumen += f"Tipo de ruta: {route['Tipo'][0]}"
+        resumen += f"Valoracion: {route['valoracion']}"
+        resumen += f"Distancia: {route['distancia']}"
+        elemento = {
+            "id": route['Id'],
+            "nombre": route['titulo'],
+            "tipo": "Cultural",
+            "ubicacion": route['ubicacion'],
+            "temperatura": temperatura,
+            "valoracion": f"'{route['Valoracion']}'",
+            "tipoActividad": f"{route['tags'][0]}",
+            "otros": route['distancia']
+        }
+        rutas_completas.append(elemento)
+    return rutas_completas
+'''
+
+
+def escapeHTML(text):
+    # Reemplaza caracteres especiales con entidades HTML
+    html_escape_table = {
+        "&": "&amp;",
+        '"': "&quot;",
+        "'": "&apos;",
+        ">": "&gt;",
+        "<": "&lt;",
+    }
+    return "".join(html_escape_table.get(c, c) for c in text)
 
 @app.route("/travel_list", methods=["GET", "POST"])
 def travel_list():
     alojamientos = session.get('alojamientos')
     rutas = session.get('rutas')
+    print(rutas)
     return render_template('travel_list.html', alojamientos=alojamientos, rutas=rutas)
-
-
-# decorator for route(argument) function
-@app.route('/admin')
-# binding to hello_admin call
-def hello_admin():
-    return 'Hello Admin'
-
-
-@app.route('/guest/<guest>')
-# binding to hello_guest call
-def hello_guest(guest):
-    return 'Hello %s as Guest' % guest
-
-
-@app.route('/user/<name>')
-def hello_user(name):
-    # dynamic binding of URL to function
-    if name == 'admin':
-        return redirect(url_for('hello_admin'))
-    else:
-        return redirect(url_for('hello_guest'
-                                , guest=name))
 
 
 def aemetapi(codmun):
