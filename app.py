@@ -1,9 +1,8 @@
 from flask import Flask, redirect, url_for, render_template, session, request
 from flask_wtf import FlaskForm
-from wtforms.fields.html5 import DateField
 from flask_pymongo import PyMongo
 
-from wtforms import StringField, validators, PasswordField, SubmitField, SelectField
+from wtforms import StringField, validators, PasswordField, SubmitField, SelectField, DateField
 from wtforms.validators import DataRequired
 from scripts.GMaps import *
 from scripts.scrapper_tripadvisor import *
@@ -19,6 +18,7 @@ api_key_aemet = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA1MDc5NzBAYWx1bW5vcy51YzNtLm
 
 # Define database to use (check later)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/routeMaster"
+app.config["FLASK_DEBUG"] = True
 mongo = PyMongo(app)
 
 '''
@@ -135,13 +135,14 @@ def form_route():
         session['tipo_viaje'] = tipo_viaje
 
         alojamiento, rutas = consultas(destination, tipo_viaje)
+        print("NUMBER_OF_ROUTES:")
+        print(len(rutas))
+        for r in rutas: print(r)
         # Call the apis etc, get the data and process it, save it into a list
         session['alojamientos'] = alojamiento
         session['rutas'] = rutas
         return redirect(url_for('travel_list'))
     return render_template("travel_form.html", form=travel_form)
-
-
 
 
 '''
@@ -159,12 +160,13 @@ def consultas(destino, tipo_viaje):
     rutas_completas = []
     # choices=[("cultural", "Cultural"), ("sporty", "Deporte"), ("mix", "Mixto")],
 
-    alojamiento = busqueda(lista_ciudades[int(destino)-1]["Ciudad"])[0:2]  # solo queremos 2 alojamientos
-    lista_tiempo = aemetapi(lista_ciudades[int(destino)-1]["CPRO"] + lista_ciudades[int(destino)-1]["CMUN"])
+    alojamiento = busqueda(lista_ciudades[int(destino) - 1]["Ciudad"])[0:2]  # solo queremos 2 alojamientos
+    lista_tiempo = aemetapi(lista_ciudades[int(destino) - 1]["CPRO"] + lista_ciudades[int(destino) - 1]["CMUN"])
 
     if tipo_viaje == "cultural":
         # Change here 5 -> number of days
-        actividades = tripadvisor(lista_ciudades[int(destino)-1]["TripAdvisor"])[0:5]
+        print("LLAMADA A TRIPADVISOR")
+        actividades = tripadvisor(lista_ciudades[int(destino) - 1]["TripAdvisor"])[0:5]
         rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
     elif tipo_viaje == "sporty":
         # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:5]
@@ -203,7 +205,27 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
     :return: list of parsed activities into the routes format
     '''
     rutas_completas = []
-    destino = lista_ciudades[int(destino)-1]['Ciudad']
+    destino = lista_ciudades[int(destino) - 1]['Ciudad']
+    temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
+    # Crear resumen de temperaturas
+    resumen = "Temperaturas: "
+
+    for actividad in actividades:
+
+        elemento = {
+            "id": actividad['Id'],
+            "nombre": actividad['Nombre'],
+            "tipo": "Cultural",
+            "ubicacion": destino,
+            "temperatura": temperatura,
+            "valoracion": f"'{actividad['Valoracion']}'",
+            "tipoActividad": f"{actividad['Tipo'][0]}",
+            "otros": resumen
+        }
+        rutas_completas.append(elemento)
+    '''
+    rutas_completas = []
+    destino = lista_ciudades[int(destino) - 1]['Ciudad']
     temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
     # Crear resumen de temperaturas
     resumen = "Temperaturas: "
@@ -229,6 +251,7 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
             "otros": resumen
         }
         rutas_completas.append(elemento)
+        '''
     return rutas_completas
 
 
@@ -277,6 +300,7 @@ def escapeHTML(text):
         "<": "&lt;",
     }
     return "".join(html_escape_table.get(c, c) for c in text)
+
 
 @app.route("/travel_list", methods=["GET", "POST"])
 def travel_list():
