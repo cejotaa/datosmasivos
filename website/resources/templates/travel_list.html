@@ -24,6 +24,10 @@
                                 <td>{{ ruta.tipo }}</td>
                                 <td>{{ ruta.ubicacion }}</td>
                                 <td>{{ ruta.temperatura }}</td>
+                                <td><a href="{{ url_for('travel_details', ruta_id=ruta.id) }}">detalles</a></td>
+                                <!--td class="col-md-1">
+                            		<a href="#" onclick="showModal('{{ruta.nombre}}','{{ruta.otros}}')">Ver más</a>
+                        	    </td-->
 
                             </tr>
                         {% endfor %}

@@ -124,7 +124,9 @@ def tripadvisor(argumento):
     # codigo_ciudad = obtener_codigo(capitales,argumento)
 
     # URL de la página de resultados de TripAdvisor
+    # https://www.tripadvisor.com/Attractions-g187452-Activities-oa0
     url = f"https://www.tripadvisor.com/Attractions-{argumento}-Activities-oa0"
+    print(argumento)
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML/like Gecko) '
@@ -137,7 +139,8 @@ def tripadvisor(argumento):
     soup = BeautifulSoup(response.content, "html.parser")
 
     activities_containers = soup.find_all("div", class_="hZuqH y")
-
+    print("ACTIVITIES CONTAINER")
+    print(len(activities_containers))
 
     i = 0
     actividades = []
@@ -180,7 +183,7 @@ def valoration_extractor(container):
         valoracion = process_valoracion(valoracion)
         print("valoracion de la actividad: " + valoracion)
     except:
-        print("An exception occurred")
+        print("Tipo de valoracion mal")
         valoracion = "No encontrado"
         error = True
     return error, valoracion
@@ -193,7 +196,7 @@ def tipe_activity_extractor(container):
         tipo = process_tipo(tipo)
         print("tipo de la actividad: " + tipo)
     except:
-        print("An exception occurred")
+        print("Tipo de actividad mal")
         tipo = "No encontrado"
         error = True
     return error, tipo
@@ -206,7 +209,7 @@ def name_extractor(container):
         name = process_name(name)
         print("Nombre de la actividad: " + name)
     except:
-        print("An exception occurred")
+        print("Nombre mal")
         name = "No encontrado"
         error = True
     return error, name

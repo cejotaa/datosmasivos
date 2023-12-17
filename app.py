@@ -20,6 +20,7 @@ api_key_aemet = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA1MDc5NzBAYWx1bW5vcy51YzNtLm
 app.config["MONGO_URI"] = "mongodb://localhost:27017/routeMaster"
 app.config["FLASK_DEBUG"] = True
 mongo = PyMongo(app)
+aux_list = []
 
 '''
     Auxiliar arrays etc
@@ -126,7 +127,7 @@ def form_route():
 
     # Get the results from the travel_form and process them -> redirect to /travel_list with the resulting data
     if travel_form.validate_on_submit():
-        # TODO check the days and pass this value to the consultas(destination, tipo_viaje) to limit activities per days
+        # TODO check the days and pass this value to the consultas(destination, tipo_viaje, days) to limit activities per days
         people = travel_form.people.data
         days = travel_form.days.data
         tipo_viaje = travel_form.type_trip.data
@@ -135,8 +136,6 @@ def form_route():
         session['tipo_viaje'] = tipo_viaje
 
         alojamiento, rutas = consultas(destination, tipo_viaje)
-        print("NUMBER_OF_ROUTES:")
-        print(len(rutas))
         for r in rutas: print(r)
         # Call the apis etc, get the data and process it, save it into a list
         session['alojamientos'] = alojamiento
@@ -155,21 +154,24 @@ def consultas(destino, tipo_viaje):
         Auxiliar method that communicates with the apis, etc to extract data
     :param destino: string that shows the index in the list of cities
     :param tipo_viaje: string that can be "cultural", "sporty" or "mix"
-    :return: the list of hotels, the complete set of routes
+    :param dias: number of days of the trip
+    :return: the list of hotels, the complete set of routes per day
     '''
     rutas_completas = []
     # choices=[("cultural", "Cultural"), ("sporty", "Deporte"), ("mix", "Mixto")],
+
 
     alojamiento = busqueda(lista_ciudades[int(destino) - 1]["Ciudad"])[0:2]  # solo queremos 2 alojamientos
     lista_tiempo = aemetapi(lista_ciudades[int(destino) - 1]["CPRO"] + lista_ciudades[int(destino) - 1]["CMUN"])
 
     if tipo_viaje == "cultural":
         # Change here 5 -> number of days
-        print("LLAMADA A TRIPADVISOR")
         actividades = tripadvisor(lista_ciudades[int(destino) - 1]["TripAdvisor"])[0:5]
+        print("Actividades:")
+        print(len(actividades))
         rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
     elif tipo_viaje == "sporty":
-        # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:5]
+        # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:dias]
         # Change here 5 -> number of days
         # TODO add routes_parser and check
         print("routes things and stuff")
@@ -208,10 +210,15 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
     destino = lista_ciudades[int(destino) - 1]['Ciudad']
     temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
     # Crear resumen de temperaturas
-    resumen = "Temperaturas: "
+    resumen = "'Temperaturas: \n'"
+    for i, temp_data in enumerate(lista_tiempo, start=1):
+        resumen += f"Día {i}: Fecha {escapeHTML(temp_data['Fecha'])}, " \
+                   f"Temperatura máxima {escapeHTML(temp_data['TMax'])}, " \
+                   f"Temperatura mínima {escapeHTML(temp_data['TMin'])}"
+
+        resumen += "\n"
 
     for actividad in actividades:
-
         elemento = {
             "id": actividad['Id'],
             "nombre": actividad['Nombre'],
@@ -223,6 +230,7 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
             "otros": resumen
         }
         rutas_completas.append(elemento)
+        aux_list.append(elemento)
     '''
     rutas_completas = []
     destino = lista_ciudades[int(destino) - 1]['Ciudad']
@@ -251,7 +259,7 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
             "otros": resumen
         }
         rutas_completas.append(elemento)
-        '''
+    '''
     return rutas_completas
 
 
@@ -306,9 +314,14 @@ def escapeHTML(text):
 def travel_list():
     alojamientos = session.get('alojamientos')
     rutas = session.get('rutas')
-    print(rutas)
     return render_template('travel_list.html', alojamientos=alojamientos, rutas=rutas)
 
+@app.route('/travel_details/<int:ruta_id>', methods=["GET", "POST"])
+def travel_details(ruta_id):
+    # Lógica para obtener detalles de la ruta con ID 'ruta_id
+    ruta = busca_id(ruta_id)
+    # Renderiza una plantilla con los detalles o realiza otras acciones según sea necesario
+    return render_template('travel_details.html', ruta=ruta)
 
 def aemetapi(codmun):
     AEMETApi(api_key_aemet, codmun)
@@ -350,6 +363,13 @@ def mongoquery(query):
         id += 1
         res.append(payload_route)
     return res
+
+
+def busca_id(id):
+    for i in aux_list:
+        print(i)
+        if i['id'] == id:
+            return i
 
 
 if __name__ == '__main__':

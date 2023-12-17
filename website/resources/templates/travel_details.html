@@ -1,59 +1,70 @@
 {% extends "base.html" %}
-{% block titulo %} Listado de viajes disponibles {% endblock %}
+{% block titulo %} Detalles de la ruta: {{ ruta.nombre }} {% endblock %}
 {% block content %}
 
-<h2>Viajes disponibles</h2>
-<div class="row">
-    <!-- http://librosweb.es/libro/bootstrap_3/capitulo_2/tipos_de_rejillas.html -->
-    <!-- Inicio del Bloque -->
+<div class="container mt-4">
+    <h2>Detalles de la ruta</h2>
 
-    <table class="table table-hover" id="tableTravels">
-        <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Ubicación</th>
-            <th>Temperaturas</th>
-            <th class="col-md-1"></th>
-        </tr>
-        </thead>
-        <tbody>
-            {% for ruta in rutas %}
-            <tr>
-                <td>{{ ruta.nombre }}</td>
-                <td>{{ ruta.tipo }}</td>
-                <td>{{ ruta.ubicacion }}</td>
-                <td>{{ ruta.temperatura }}</td>
-                <td class="col-md-1"><a href="#">Ver más</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-<div>
-    <h2>Alojamientos disponibles</h2>
-    <table class="table table-hover" id="tableAlojamientos">
-        <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Dirección</th>
-            <th>Valoración</th>
-            <th class="col-md-1"></th>
-            <th class="col-md-1"></th>
-        </tr>
-        </thead>
-        <tbody>
-            {% for alojamiento in alojamientos %}
-            <tr>
-                <td>{{ alojamiento.nombre }}</td>
-                <td>{{ alojamiento.direccion }}</td>
-                <td>{{ alojamiento.valoracion }}</td>
-                <td class="col-md-1"><a href="#">Detalles</a></td>
-                <td class="col-md-1"><a href="#">Reservar</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Nombre</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ ruta.nombre }}</h5>
+                </div>
+            </div>
+        </div>
 
-    </table>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Tipo</div>
+                <div class="card-body">
+                    <p class="card-text">{{ ruta.tipo }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Ubicación</div>
+                <div class="card-body">
+                    <p class="card-text">{{ ruta.ubicacion }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Temperatura</div>
+                <div class="card-body">
+                    <p class="card-text">{{ ruta.temperatura }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Valoración</div>
+                <div class="card-body">
+                    <p class="card-text">{{ ruta.valoracion }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Tipo de actividad</div>
+                <div class="card-body">
+                    <p class="card-text">{{ ruta.tipoActividad }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
 {% endblock %}
