@@ -171,15 +171,18 @@ def consultas(destino, tipo_viaje):
         print(len(actividades))
         rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
     elif tipo_viaje == "sporty":
+        #    TODO check
+        print("sporty")
         # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:dias]
+        # rutas_completas.extend(aux_parse_activities(routes, destino, lista_tiempo))
         # Change here 5 -> number of days
-        # TODO add routes_parser and check
-        print("routes things and stuff")
+
     else:
         # Change here 5 -> number of days
         actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])[0:5]
         rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
-        # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))
+        # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:dias]
+        # rutas_completas.extend(aux_parse_activities(routes, destino, lista_tiempo))
 
     app.logger.info(lista_tiempo)
     return alojamiento, rutas_completas
@@ -197,7 +200,6 @@ def consultas(destino, tipo_viaje):
 '''
 
 
-# TODO problema localizado al crear el resumen y pasárselo al html, no se muestra de manera correcta
 def aux_parse_activities(actividades, destino, lista_tiempo):
     '''
         Aux method to parse the data in a common format of route to show in the html
@@ -209,14 +211,20 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
     rutas_completas = []
     destino = lista_ciudades[int(destino) - 1]['Ciudad']
     temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
-    # Crear resumen de temperaturas
-    resumen = "'Temperaturas: \n'"
-    for i, temp_data in enumerate(lista_tiempo, start=1):
-        resumen += f"Día {i}: Fecha {escapeHTML(temp_data['Fecha'])}, " \
-                   f"Temperatura máxima {escapeHTML(temp_data['TMax'])}, " \
-                   f"Temperatura mínima {escapeHTML(temp_data['TMin'])}"
 
-        resumen += "\n"
+    resumen = '\n'
+
+    for i, temp_data in enumerate(lista_tiempo, start=1):
+        resumen += (
+            f'Día {i}: Fecha {escapeHTML(temp_data["Fecha"])}, '
+            f'TMax: {escapeHTML(temp_data["TMax"])}, '
+            f'TMin: {escapeHTML(temp_data["TMin"])}, '
+            f'Precipitaciones: {escapeHTML(temp_data["Precipitacion"])}, '
+            f'Viento: {escapeHTML(temp_data["Viento"])}, '
+            f'Estado del cielo: {escapeHTML(temp_data["Estado_cielo"])}\n'
+        )
+
+    print(resumen)
 
     for actividad in actividades:
         elemento = {
@@ -231,58 +239,31 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
         }
         rutas_completas.append(elemento)
         aux_list.append(elemento)
-    '''
-    rutas_completas = []
-    destino = lista_ciudades[int(destino) - 1]['Ciudad']
-    temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
-    # Crear resumen de temperaturas
-    resumen = "Temperaturas: "
 
-    for i, temp_data in enumerate(lista_tiempo, start=1):
-        resumen += f"Día {i}: Fecha {escapeHTML(temp_data['Fecha'])}, " \
-                   f"Temperatura máxima {escapeHTML(temp_data['TMax'])}, " \
-                   f"Temperatura mínima {escapeHTML(temp_data['TMin'])}"
-
-    resumen += " "
-
-    for actividad in actividades:
-        resumen += f"Tipo de actividad {actividad['Tipo'][0]}"
-        resumen += f"Valoracion {actividad['Valoracion']}"
-        elemento = {
-            "id": actividad['Id'],
-            "nombre": actividad['Nombre'],
-            "tipo": "Cultural",
-            "ubicacion": destino,
-            "temperatura": temperatura,
-            "valoracion": f"'{actividad['Valoracion']}'",
-            "tipoActividad": f"{actividad['Tipo'][0]}",
-            "otros": resumen
-        }
-        rutas_completas.append(elemento)
-    '''
     return rutas_completas
 
 
-'''
 def aux_parse_routes(routes, destino, lista_tiempo):
 
     rutas_completas = []
-    destino = lista_ciudades[int(destino)]['Ciudad']
+    destino = lista_ciudades[int(destino) - 1]['Ciudad']
     temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
-    # Crear resumen de temperaturas
-    resumen = "Temperaturas: "
+
+    resumen = '\n'
 
     for i, temp_data in enumerate(lista_tiempo, start=1):
-        resumen += f"Día {i}: Fecha {escapeHTML(temp_data['Fecha'])}, " \
-                   f"Temperatura máxima {escapeHTML(temp_data['TMax'])}, " \
-                   f"Temperatura mínima {escapeHTML(temp_data['TMin'])}"
+        resumen += (
+            f'Día {i}: Fecha {escapeHTML(temp_data["Fecha"])}, '
+            f'TMax: {escapeHTML(temp_data["TMax"])}, '
+            f'TMin: {escapeHTML(temp_data["TMin"])}, '
+            f'Precipitaciones: {escapeHTML(temp_data["Precipitacion"])}, '
+            f'Viento: {escapeHTML(temp_data["Viento"])}, '
+            f'Estado del cielo: {escapeHTML(temp_data["Estado_cielo"])}\n'
+        )
 
-    resumen += " "
+    print(resumen)
 
     for route in routes:
-        resumen += f"Tipo de ruta: {route['Tipo'][0]}"
-        resumen += f"Valoracion: {route['valoracion']}"
-        resumen += f"Distancia: {route['distancia']}"
         elemento = {
             "id": route['Id'],
             "nombre": route['titulo'],
@@ -294,8 +275,9 @@ def aux_parse_routes(routes, destino, lista_tiempo):
             "otros": route['distancia']
         }
         rutas_completas.append(elemento)
+        aux_list.append(elemento)
     return rutas_completas
-'''
+
 
 
 def escapeHTML(text):
