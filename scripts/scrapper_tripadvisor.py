@@ -53,11 +53,13 @@ capitales = [
     ("Zamora", "g262064"),
 ]
 
-def obtener_codigo(capitales, argumento):  
-  for capital, codigo in capitales:
-    if capital == argumento:
-      return codigo
-  return None
+
+def obtener_codigo(capitales, argumento):
+    for capital, codigo in capitales:
+        if capital == argumento:
+            return codigo
+    return None
+
 
 def procesar_actividades(actividades):
     for actividad in actividades:
@@ -78,7 +80,7 @@ def procesar_actividades(actividades):
         actividad["Tipo"] = tipos
 
         valoracion_original = actividad["Valoracion"]
-            # Utilizar expresiones regulares para extraer el número de la valoración original
+        # Utilizar expresiones regulares para extraer el número de la valoración original
         match = re.search(r'\d+\.\d+', valoracion_original)
         if match:
             numero_valoracion = match.group()
@@ -87,53 +89,81 @@ def procesar_actividades(actividades):
             # Actualizar el campo 'Valoracion' con el nuevo formato
             actividad["Valoracion"] = nueva_valoracion
 
+
+def process_name(nombre):
+    # Procesar el campo 'Nombre'
+    # Dividir el nombre usando el patrón "número punto espacio"
+    partes_nombre = nombre.split('. ')
+    # Tomar la última parte del nombre (después del último número y punto)
+    nuevo_nombre = partes_nombre[-1]
+    # Actualizar el campo 'Nombre'
+    return nuevo_nombre
+
+
+def process_tipo(tipo):
+    # Procesar el campo 'Tipo'
+    # Dividir el tipo usando el separador " • "
+    tipos = tipo.split(' • ')
+    # Actualizar el campo 'Tipo' con la lista de tipos
+    return tipos
+
+def process_valoracion(valoracion):
+    # Utilizar expresiones regulares para extraer el número de la valoración original
+    match = re.search(r'\d+\.\d+', valoracion)
+    if match:
+        numero_valoracion = match.group()
+        # Reemplazar el punto con coma para obtener el formato deseado
+        nueva_valoracion = numero_valoracion.replace('.', ',')
+        # Actualizar el campo 'Valoracion' con el nuevo formato
+        return nueva_valoracion
+    return valoracion
+
 def tripadvisor(argumento):
+    error = False
     # argumento = input("Introduce el nombre de la ciudad: ")
     # codigo_ciudad = obtener_codigo(capitales,argumento)
 
     # URL de la página de resultados de TripAdvisor
+    # https://www.tripadvisor.com/Attractions-g187452-Activities-oa0
     url = f"https://www.tripadvisor.com/Attractions-{argumento}-Activities-oa0"
+    print(argumento)
 
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML/like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML/like Gecko) '
+                      'Chrome/91.0.4472.124 Safari/537.36'
     }
 
     # Realizar una solicitud HTTP para obtener la página
-    response = requests.get(url,headers=headers, timeout=10)
-        
+    response = requests.get(url, headers=headers, timeout=10)
     # Parsear el contenido de la página con BeautifulSoup
     soup = BeautifulSoup(response.content, "html.parser")
 
     activities_containers = soup.find_all("div", class_="hZuqH y")
+    print("ACTIVITIES CONTAINER")
+    print(len(activities_containers))
+
     i = 0
     actividades = []
-    for container in activities_containers:
-        # Obtener el nombre de actividad
-        name = container.find("div", class_="XfVdV o AIbhI").text.strip()
-    
-        # Obtener el tipo de actividad
-        tipo = container.find("div", class_="biGQs _P pZUbB hmDzD").text.strip()   
 
-        #obtener valoracion
-        valoracion = container.find('svg')['aria-label']
+    for container in activities_containers:
+        error, name = name_extractor(container)
+        error, tipo = tipe_activity_extractor(container)
+        error, valoracion = valoration_extractor(container)
+
         actividad = {
             "Id": i,
             "Nombre": name,
             "Tipo": tipo,
-            "Valoracion": valoracion
+            "Valoracion": valoracion,
+            "Error": str(error)
         }
-        
-        actividades.append(actividad)
-        i += 1 
 
-        if i >=30:
+        actividades.append(actividad)
+        i += 1
+        if i >= 30:
             break
 
-
-    # Llama a la función para procesar la lista de actividades
-    procesar_actividades(actividades)
     return actividades
-
 
     # # Imprime el resultado esperado
     # for actividad in actividades:
@@ -142,6 +172,44 @@ def tripadvisor(argumento):
     #     print("Valoracion:", actividad["Valoracion"])
     #     print()
 
-
     # df = pd.DataFrame(actividades)
     # df.to_json("actividades.json", orient="records")
+
+
+def valoration_extractor(container):
+    error = False
+    try:
+        valoracion = container.find('svg')['aria-label']
+        valoracion = process_valoracion(valoracion)
+        print("valoracion de la actividad: " + valoracion)
+    except:
+        print("Tipo de valoracion mal")
+        valoracion = "No encontrado"
+        error = True
+    return error, valoracion
+
+
+def tipe_activity_extractor(container):
+    error = False
+    try:
+        tipo = container.find("div", class_="biGQs _P pZUbB hmDzD").text.strip()
+        tipo = process_tipo(tipo)
+        print("tipo de la actividad: " + tipo)
+    except:
+        print("Tipo de actividad mal")
+        tipo = "No encontrado"
+        error = True
+    return error, tipo
+
+
+def name_extractor(container):
+    error = False
+    try:
+        name = container.find("div", class_="XfVdV o AIbhI").text.strip()
+        name = process_name(name)
+        print("Nombre de la actividad: " + name)
+    except:
+        print("Nombre mal")
+        name = "No encontrado"
+        error = True
+    return error, name

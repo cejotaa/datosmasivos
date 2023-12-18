@@ -6,33 +6,38 @@
 <div class="row">
     <!-- http://librosweb.es/libro/bootstrap_3/capitulo_2/tipos_de_rejillas.html -->
     <!-- Inicio del Bloque -->
+    {% if rutas|length > 0 %}
+        <table class="table table-hover" id="tableTravels">
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Ubicación</th>
+                    <th>Temperaturas</th>
+                    <th class="col-md-1"></th>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for ruta in rutas %}
+                            <tr>
+                                <td>{{ ruta.nombre }}</td>
+                                <td>{{ ruta.tipo }}</td>
+                                <td>{{ ruta.ubicacion }}</td>
+                                <td>{{ ruta.temperatura }}</td>
+                                <td><a href="{{ url_for('travel_details', ruta_id=ruta.id) }}">detalles</a></td>
+                                <!--td class="col-md-1">
+                            		<a href="#" onclick="showModal('{{ruta.nombre}}','{{ruta.otros}}')">Ver más</a>
+                        	    </td-->
 
-    <table class="table table-hover" id="tableTravels">
-        <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Ubicación</th>
-            <th>Temperaturas</th>
-            <th class="col-md-1"></th>
-        </tr>
-        </thead>
-        <tbody>
-            {% for ruta in rutas %}
-            <tr>
-                <td>{{ ruta.nombre }}</td>
-                <td>{{ ruta.tipo }}</td>
-                <td>{{ ruta.ubicacion }}</td>
-                <td>{{ ruta.temperatura }}</td>
-                <td class="col-md-1">
-                    <a href="#" onclick="showModal('{{ruta.nombre}}','{{ruta.otros}}')">Ver más</a>
-                </td>
-
-
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                            </tr>
+                        {% endfor %}
+                </tbody>
+        </table>
+    {% else %}
+        <div>
+            <p colspan="4">No hay rutas disponibles</p>
+        </div>
+    {% endif %}
 </div>
 <div>
     <h2>Alojamientos disponibles</h2>

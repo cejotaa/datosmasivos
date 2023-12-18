@@ -12,27 +12,27 @@
                 <form action="" method='POST' name="myform">
                     {{ form.csrf_token }}
                     <div class="mb-3 d-flex align-items-center">
-                        {{ form.startdate.label(style="width: 100px")}}
-                        {{ form.startdate(class='datepicker', style="width:200px")}} {{ form.hidden_tag() }}
+                        {{ form.startdate.label(style="width: 200px")}}
+                        {{ form.startdate(class='datepicker', style="width:400px")}} {{ form.hidden_tag() }}
                     </div>
                     <div class="mb-3 d-flex align-items-center">
-                        {{ form.destination.label(class="me-2", style="width: 100px") }}
-                        {{ form.destination(class="form-select form-control form-control-sm me-2", style="width: 200px", id="id_destination") }}
-                    </div>
-
-                    <div class="mb-3 d-flex align-items-center">
-                        {{ form.people.label(class="me-2", style="width: 100px") }}
-                        {{ form.people(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
+                        {{ form.destination.label(class="me-2", style="width: 200px") }}
+                        {{ form.destination(class="form-select form-control form-control-sm me-2", style="width: 400px", id="id_destination") }}
                     </div>
 
                     <div class="mb-3 d-flex align-items-center">
-                        {{ form.days.label(class="me-2", style="width: 100px") }}
-                        {{ form.days(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
+                        {{ form.people.label(class="me-2", style="width: 200px") }}
+                        {{ form.people(class="form-select form-control form-control-sm me-2", style="width: 400px") }}
                     </div>
 
                     <div class="mb-3 d-flex align-items-center">
-                        {{ form.type_trip.label(class="me-2", style="width: 100px") }}
-                        {{ form.type_trip(class="form-select form-control form-control-sm me-2", style="width: 200px") }}
+                        {{ form.days.label(class="me-2", style="width: 200px") }}
+                        {{ form.days(class="form-select form-control form-control-sm me-2", style="width: 400px") }}
+                    </div>
+
+                    <div class="mb-3 d-flex align-items-center">
+                        {{ form.type_trip.label(class="me-2", style="width: 200px") }}
+                        {{ form.type_trip(class="form-select form-control form-control-sm me-2", style="width: 400px") }}
                     </div>
 
                     {{ form.submit(class="btn btn-primary") }}
@@ -79,11 +79,12 @@
         }
 
         // Llama a updateMap cuando cambia la destination
-        var destinationInput = document.querySelector('#id_destination');
-        destinationInput.addEventListener('input', function() {
-            updateMap(destinationInput.value);
-        });
+        //var destinationInput = document.querySelector('#id_destination');
+        //destinationInput.addEventListener('input', function() {
+        //    updateMap(destinationInput.value);
+        //});
     }
 </script>
+
 
 {% endblock %}
