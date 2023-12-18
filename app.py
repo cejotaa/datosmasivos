@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, session, request
 from flask_wtf import FlaskForm
 from flask_pymongo import PyMongo
+import random
 
 from wtforms import StringField, validators, PasswordField, SubmitField, SelectField, DateField
 from wtforms.validators import DataRequired
@@ -35,47 +36,47 @@ destination = {'': 'Seleccione su destino',
                6: 'Badajoz',  # 06 015
                7: 'Palma de Mallorca',  # 07 040
                8: 'Barcelona',  # 08 019
-               9: 'Burgos',  # 09 059
-               10: 'Caceres',  # 10 037
-               11: 'Cadiz',  # 11 012
-               12: 'Santander',  # 39 075
-               13: 'Castellon de la Plana',  # 12 040
-               14: 'Ciudad Real',  # 13 034
-               15: 'Cordoba',  # 14 021
-               16: 'Cuenca',  # 16 078
-               17: 'Girona',  # 17 079
-               18: 'Granada',  # 18 087
-               19: 'Guadalajara',  # 19 190
-               20: 'San Sebastián',  # 20 069
-               21: 'Huelva',  # 21 041
-               22: 'Huesca',  # 22 125
-               23: 'Jaen',  # 23 050
-               24: 'Logrono',  # 26 089
-               25: 'Las Palmas de Gran Canaria',  # 35 016
-               26: 'Leon',  # 24 089
-               27: 'Lerida',  # 25 120
-               28: 'Lugo',  # 27 028
-               29: 'Madrid',  # 28 079
-               30: 'Malaga',  # 29 067
-               31: 'Murcia',  # 30 030
-               32: 'Pamplona',  # 31 201
-               33: 'Ourense',  # 32 054
-               34: 'Palencia',  # 34 120
-               35: 'Pontevedra',  # 36 038
-               36: 'Salamanca',  # 37 274
-               37: 'Santa Cruz de Tenerife',  # 38 038
-               38: 'Segovia',  # 40 194
-               39: 'Sevilla',  # 41 091
-               40: 'Soria',  # 42 173
-               41: 'Tarragona',  # 43 148
-               42: 'Teruel',  # 44 216
-               43: 'Toledo',  # 45 168
-               44: 'Valencia',  # 46 250
-               45: 'Valladolid',  # 47 186
-               46: 'Vitoria Gasteiz',  # 01 059
-               47: 'Zamora',  # 49 275
-               48: 'Zaragoza',  # 50 297
-               'biscay': 'Bilbao'  # 48 020
+               9: 'Bilbao',  # 48 020
+               10: 'Burgos',  # 09 059
+               11: 'Caceres',  # 10 037
+               12: 'Cadiz',  # 11 012
+               13: 'Santander',  # 39 075
+               14: 'Castellon de la Plana',  # 12 040
+               15: 'Ciudad Real',  # 13 034
+               16: 'Cordoba',  # 14 021
+               17: 'Cuenca',  # 16 078
+               18: 'Girona',  # 17 079
+               19: 'Granada',  # 18 087
+               20: 'Guadalajara',  # 19 190
+               21: 'San Sebastián',  # 20 069
+               22: 'Huelva',  # 21 041
+               23: 'Huesca',  # 22 125
+               24: 'Jaen',  # 23 050
+               25: 'Logrono',  # 26 089
+               26: 'Las Palmas de Gran Canaria',  # 35 016
+               27: 'Leon',  # 24 089
+               28: 'Lerida',  # 25 120
+               29: 'Lugo',  # 27 028
+               30: 'Madrid',  # 28 079
+               31: 'Malaga',  # 29 067
+               32: 'Murcia',  # 30 030
+               33: 'Pamplona',  # 31 201
+               34: 'Ourense',  # 32 054
+               35: 'Palencia',  # 34 120
+               36: 'Pontevedra',  # 36 038
+               37: 'Salamanca',  # 37 274
+               38: 'Santa Cruz de Tenerife',  # 38 038
+               39: 'Segovia',  # 40 194
+               40: 'Sevilla',  # 41 091
+               41: 'Soria',  # 42 173
+               42: 'Tarragona',  # 43 148
+               43: 'Teruel',  # 44 216
+               44: 'Toledo',  # 45 168
+               45: 'Valencia',  # 46 250
+               46: 'Valladolid',  # 47 186
+               47: 'Vitoria Gasteiz',  # 01 059
+               48: 'Zamora',  # 49 275
+               49: 'Zaragoza'  # 50 297
                }
 
 lista_ciudades = []
@@ -135,7 +136,7 @@ def form_route():
         session['startdate'] = travel_form.startdate.data
         session['tipo_viaje'] = tipo_viaje
 
-        alojamiento, rutas = consultas(destination, tipo_viaje)
+        alojamiento, rutas = consultas(destination, tipo_viaje,days)
         for r in rutas: print(r)
         # Call the apis etc, get the data and process it, save it into a list
         session['alojamientos'] = alojamiento
@@ -149,7 +150,7 @@ def form_route():
 '''
 
 
-def consultas(destino, tipo_viaje):
+def consultas(destino, tipo_viaje,dias):
     '''
         Auxiliar method that communicates with the apis, etc to extract data
     :param destino: string that shows the index in the list of cities
@@ -161,30 +162,37 @@ def consultas(destino, tipo_viaje):
     # choices=[("cultural", "Cultural"), ("sporty", "Deporte"), ("mix", "Mixto")],
 
 
-    alojamiento = busqueda(lista_ciudades[int(destino) - 1]["Ciudad"])[0:2]  # solo queremos 2 alojamientos
-    lista_tiempo = aemetapi(lista_ciudades[int(destino) - 1]["CPRO"] + lista_ciudades[int(destino) - 1]["CMUN"])
+    alojamiento = busqueda(lista_ciudades[int(destino)]["Ciudad"])[0:2]  # solo queremos 2 alojamientos
+    lista_tiempo = aemetapi(lista_ciudades[int(destino)]["CPRO"] + lista_ciudades[int(destino)]["CMUN"])
 
     if tipo_viaje == "cultural":
         # Change here 5 -> number of days
-        actividades = tripadvisor(lista_ciudades[int(destino) - 1]["TripAdvisor"])[0:5]
+        actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])[0:int(dias)]
         print("Actividades:")
         print(len(actividades))
         rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
     elif tipo_viaje == "sporty":
         #    TODO check
         print("sporty")
-        # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:dias]
-        # rutas_completas.extend(aux_parse_activities(routes, destino, lista_tiempo))
+        routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:int(dias)]
+        rutas_completas.extend(aux_parse_routes(routes, destino, lista_tiempo))
         # Change here 5 -> number of days
 
     else:
-        # Change here 5 -> number of days
-        actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])[0:5]
-        rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
-        # routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:dias]
-        # rutas_completas.extend(aux_parse_activities(routes, destino, lista_tiempo))
-
-    app.logger.info(lista_tiempo)
+        if (random.randint(0, 1) == 0):
+            # Change here 5 -> number of days
+            actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])[0:int(int(dias)/2)]
+            rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
+            print("Tamaño actividades:")
+            print(len(actividades))
+            routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:int(int(dias) - len(actividades))]
+            rutas_completas.extend(aux_parse_routes(routes, destino, lista_tiempo))
+        else : 
+            routes = mongoquery(mongo.db.route.find({'zona': lista_ciudades[int(destino)]["AllTrails"]}))[0:int(int(dias)/2)]
+            rutas_completas.extend(aux_parse_routes(routes, destino, lista_tiempo))
+            actividades = tripadvisor(lista_ciudades[int(destino)]["TripAdvisor"])[0:int(int(dias) - len(routes))]
+            rutas_completas.extend(aux_parse_activities(actividades, destino, lista_tiempo))
+            
     return alojamiento, rutas_completas
 
 
@@ -209,7 +217,7 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
     :return: list of parsed activities into the routes format
     '''
     rutas_completas = []
-    destino = lista_ciudades[int(destino) - 1]['Ciudad']
+    destino = lista_ciudades[int(destino)]['Ciudad']
     temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
 
     resumen = '\n'
@@ -224,11 +232,9 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
             f'Estado del cielo: {escapeHTML(temp_data["Estado_cielo"])}\n'
         )
 
-    print(resumen)
-
     for actividad in actividades:
         elemento = {
-            "id": actividad['Id'],
+            "id": actividad['Id'] if actividad['Id'] is not None else a,
             "nombre": actividad['Nombre'],
             "tipo": "Cultural",
             "ubicacion": destino,
@@ -246,7 +252,7 @@ def aux_parse_activities(actividades, destino, lista_tiempo):
 def aux_parse_routes(routes, destino, lista_tiempo):
 
     rutas_completas = []
-    destino = lista_ciudades[int(destino) - 1]['Ciudad']
+    destino = lista_ciudades[int(destino)]['Ciudad']
     temperatura = f"{lista_tiempo[0]['TMax']} / {lista_tiempo[0]['TMin']}"
 
     resumen = '\n'
@@ -261,23 +267,20 @@ def aux_parse_routes(routes, destino, lista_tiempo):
             f'Estado del cielo: {escapeHTML(temp_data["Estado_cielo"])}\n'
         )
 
-    print(resumen)
-
-    for route in routes:
+    for route in routes:        
         elemento = {
-            "id": route['Id'],
+            "id": route['id'],
             "nombre": route['titulo'],
-            "tipo": "Cultural",
-            "ubicacion": route['ubicacion'],
+            "tipo": route['type'],
+            "ubicacion": route['location'],
             "temperatura": temperatura,
-            "valoracion": f"'{route['Valoracion']}'",
+            "valoracion": f"'{route['rate']}'",
             "tipoActividad": f"{route['tags'][0]}",
             "otros": route['distancia']
         }
         rutas_completas.append(elemento)
         aux_list.append(elemento)
     return rutas_completas
-
 
 
 def escapeHTML(text):
@@ -340,7 +343,8 @@ def mongoquery(query):
                          'titulo': result['titulo'],
                          'url': result['url'],
                          'rate': result['valoracion'],
-                         'type': 'ruta'
+                         'tags': result['tags'],
+                         'type': 'Deporte'
                          }
         id += 1
         res.append(payload_route)

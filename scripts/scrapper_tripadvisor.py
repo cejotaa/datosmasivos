@@ -12,6 +12,7 @@ capitales = [
     ("Badajoz", "g262058"),
     ("Palma de Mallorca", "g187463"),
     ("Barcelona", "g187497"),
+    ("Bilbao", "g187454"),
     ("Burgos", "g187491"),
     ("Cáceres", "g227852"),
     ("Cádiz", "g187432"),
@@ -50,7 +51,8 @@ capitales = [
     ("Valencia", "g187529"),
     ("Valladolid", "g187495"),
     ("Vitoria", "g187458"),
-    ("Zamora", "g262064"),
+    ("Zamora", "g262064"), 
+    ("Zaragoza", "g187448")
 ]
 
 
@@ -126,7 +128,7 @@ def tripadvisor(argumento):
     # URL de la página de resultados de TripAdvisor
     # https://www.tripadvisor.com/Attractions-g187452-Activities-oa0
     url = f"https://www.tripadvisor.com/Attractions-{argumento}-Activities-oa0"
-    print(argumento)
+    print(url)
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML/like Gecko) '
@@ -134,7 +136,7 @@ def tripadvisor(argumento):
     }
 
     # Realizar una solicitud HTTP para obtener la página
-    response = requests.get(url, headers=headers, timeout=10)
+    response = requests.get(url, headers=headers, timeout=30)
     # Parsear el contenido de la página con BeautifulSoup
     soup = BeautifulSoup(response.content, "html.parser")
 
